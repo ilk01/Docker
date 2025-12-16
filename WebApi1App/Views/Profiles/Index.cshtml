@@ -1,0 +1,68 @@
+@model WebApi1App.Models.ProfilesPageViewModel
+@{
+    ViewData["Title"] = "Профили";
+}
+
+<section class="card">
+    <div class="card-header">
+        <h1 class="h1">Профили</h1>
+    </div>
+
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+
+        <div class="grid">
+            <div class="field">
+                <label asp-for="Create.FullName"></label>
+                <input asp-for="Create.FullName" class="input" />
+                <span asp-validation-for="Create.FullName" class="error"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Create.Email"></label>
+                <input asp-for="Create.Email" class="input" />
+                <span asp-validation-for="Create.Email" class="error"></span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn">Добавить профиль</button>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <h2 class="h2">Список</h2>
+    </div>
+
+    <div class="cards">
+        @foreach (var p in Model.Profiles)
+        {
+            <div class="profile-card">
+                <div class="profile-meta">
+                    <div class="badge">ID: @p.Id</div>
+                </div>
+
+                <form asp-action="Update" method="post" class="form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@p.Id" />
+
+                    <div class="field">
+                        <label>Имя</label>
+                        <input class="input" name="FullName" value="@p.FullName" />
+                    </div>
+
+                    <div class="field">
+                        <label>Email</label>
+                        <input class="input" name="Email" value="@p.Email" />
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+</section>
