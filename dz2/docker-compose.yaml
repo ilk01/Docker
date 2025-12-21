@@ -1,0 +1,95 @@
+services:
+  ms-identity:
+    build: ./ms-identity
+    container_name: ms-identity
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      ConnectionStrings__DefaultConnection: ${MS_IDENTITY_CONNECTIONSTRING}
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${IDENTITY_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${IDENTITY_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${IDENTITY_POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  domain_1:
+    build: ./domain_1
+    container_name: domain_1
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    environment:
+      ConnectionStrings__MongoDb: ${DOMAIN1_MONGO_CONNECTIONSTRING}
+    networks:
+      - backend
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  domain_2:
+    build: ./domain_2
+    container_name: domain_2
+    ports:
+      - "8083:8080"
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+    environment:
+      ConnectionStrings__Redis: ${DOMAIN2_REDIS_CONNECTIONSTRING}
+      ConnectionStrings__Db: ${DOMAIN2_DB_CONNECTIONSTRING}
+    networks:
+      - backend
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DOMAIN2_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DOMAIN2_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DOMAIN2_POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+  db_data:
